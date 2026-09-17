@@ -1,0 +1,13 @@
+/* Billing, support and completion UX */
+.gd-billing-panel-head{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.gd-billing-empty,.gd-support-empty{padding:34px 22px;text-align:center;border:1px dashed #a7aaad;border-radius:8px;background:#fff}
+.gd-billing-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.gd-support-ticket{transition:box-shadow .15s ease,transform .15s ease}
+.gd-support-ticket:hover{box-shadow:0 2px 8px rgba(0,0,0,.08);transform:translateY(-1px)}
+.gd-support-thread-head{gap:16px}.gd-support-message{border-radius:8px}
+.gd-support-reply{border-top:1px solid #dcdcde;padding-top:16px}
+.gd-completion-summary{max-width:900px;margin:20px auto;padding:28px;border:1px solid #dcdcde;border-radius:10px;background:#fff}
+.gd-completion-summary h2{margin-top:0}.gd-completion-checklist{list-style:none;margin:18px 0;padding:0}
+.gd-completion-checklist li{padding:10px 0;border-bottom:1px solid #eee}
+.gd-completion-checklist li:last-child{border-bottom:0}
+.gd-completion-next{margin-top:18px;padding:14px;border-radius:6px;background:#f6f7f7}

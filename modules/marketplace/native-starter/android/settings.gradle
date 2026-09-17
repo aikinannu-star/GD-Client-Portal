@@ -1,0 +1,2 @@
+rootProject.name = 'gd-client-portal-native'
+include ':app'

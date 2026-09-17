@@ -1,0 +1,22 @@
+
+/* Collaboration, approval and delivery UX refinement */
+.gd-collab-workflow-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 22px}
+.gd-collab-workflow-summary__item{background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:14px}
+.gd-collab-workflow-summary__label{display:block;font-size:12px;opacity:.7;margin-bottom:5px}
+.gd-collab-workflow-summary__value{font-size:18px;font-weight:700}
+.gd-approval-panel .gd-workspace-panel-head,.gd-delivery-panel .gd-workspace-panel-head{align-items:flex-start}
+.gd-approval-current,.gd-approval-empty,.gd-delivery-finalize{border:1px solid #dcdcde;border-radius:8px;padding:18px;margin:16px 0;background:#fff}
+.gd-approval-current{border-left:4px solid #2271b1}
+.gd-approval-current small{display:block;margin-top:5px;opacity:.7}
+.gd-approval-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.gd-approval-history-item{border-top:1px solid #eee;padding:12px 0}
+.gd-approval-history-item:first-of-type{margin-top:8px}
+.gd-delivery-item{display:flex;justify-content:space-between;gap:16px;align-items:center;border:1px solid #dcdcde;border-radius:8px;padding:16px;margin:10px 0;background:#fff}
+.gd-delivery-item span{display:block;margin-top:5px;font-size:13px;opacity:.72}
+.gd-delivery-item p{margin:8px 0 0}
+.gd-delivery-upload-form{display:grid;gap:10px;padding:16px;border:1px solid #dcdcde;border-radius:8px;background:#fff}
+@media(max-width:700px){
+  .gd-collab-workflow-summary{grid-template-columns:1fr 1fr}
+  .gd-delivery-item{display:block}
+  .gd-delivery-item .gd-workspace-button{display:inline-block;margin-top:12px}
+}

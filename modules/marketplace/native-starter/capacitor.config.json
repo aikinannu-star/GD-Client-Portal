@@ -1,0 +1,6 @@
+{
+  "appId": "com.example.gdclientportal",
+  "appName": "GD Client Portal",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}

@@ -1,0 +1,9 @@
+<?php
+if (!defined('ABSPATH')) exit;
+final class GDCP_Billing_Repository extends GDCP_Base_Repository {
+    public function table(){ return function_exists('gd_client_portal_billing_invoices_table') ? gd_client_portal_billing_invoices_table() : $this->db()->prefix.'gd_portal_invoices'; }
+    public function invoices($limit=100){ $sql='SELECT * FROM '.$this->table().' WHERE 1=1'; $a=array(); list($w,$wa)=$this->scoped_where(); $sql.=$w; $a=array_merge($a,$wa); if(!(function_exists('gd_client_portal_is_platform_admin')&&gd_client_portal_is_platform_admin())){$sql.=' AND user_id=%d';$a[]=get_current_user_id();} $sql.=' ORDER BY created_at DESC,id DESC LIMIT %d';$a[]=max(1,min(300,absint($limit)));return $this->db()->get_results($this->db()->prepare($sql,$a)); }
+    public function invoice($id){ $row=$this->db()->get_row($this->db()->prepare('SELECT * FROM '.$this->table().' WHERE id=%d',absint($id))); if(!$row)return null; if(function_exists('gd_client_portal_is_platform_admin')&&gd_client_portal_is_platform_admin())return $row; return absint($row->tenant_id)===$this->tenant_id() && ((function_exists('gd_client_portal_user_is_tenant_admin')&&gd_client_portal_user_is_tenant_admin()) || absint($row->user_id)===get_current_user_id()) ? $row:null; }
+    public function for_project($project_id,$limit=100){ $p=absint($project_id);if(!$p)return array();$sql='SELECT * FROM '.$this->table().' WHERE project_id=%d';$a=array($p);list($w,$wa)=$this->scoped_where();$sql.=$w;$a=array_merge($a,$wa);$sql.=' ORDER BY created_at DESC,id DESC LIMIT %d';$a[]=max(1,min(300,absint($limit)));return $this->db()->get_results($this->db()->prepare($sql,$a)); }
+    public function insert($data){ if($this->db()->insert($this->table(),$data)===false) return false; return absint($this->db()->insert_id); }
+}

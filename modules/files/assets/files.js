@@ -1,0 +1,1 @@
+(function($){$(function(){/* files interactions */});})(jQuery);

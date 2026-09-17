@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>GD Marketplace — Native Test</title>
+  <link rel="stylesheet" href="assets/marketplace.css">
+  <style>body{background:#f3f4f6;padding-bottom:100px;font-family:Arial,Helvetica,sans-serif}</style>
+</head>
+<body>
+  <header class="gd-mp-header gd-mp-vars">
+    <div class="gd-mp-header-inner">
+      <button class="gd-mp-menu-toggle" aria-label="Open menu">☰</button>
+      <div class="gd-mp-title"><h2>Marketplace</h2></div>
+      <div class="gd-mp-search">
+        <label class="gd-mp-search-label"><span class="gd-mp-search-icon">🔍</span><input id="gd-mp-mini-search" placeholder="Search products" /></label>
+        <button class="gd-mp-search-toggle" aria-label="Show search">🔎</button>
+      </div>
+      <div class="gd-mp-actions">
+        <button class="gd-mp-cart-btn">Cart <span class="gd-mp-cart-count">0</span></button>
+      </div>
+    </div>
+  </header>
+
+  <div class="gd-mp-categories" style="display:flex;padding:12px;gap:8px">
+    <button class="gd-mp-cat-tab" data-cat="all">All</button>
+    <button class="gd-mp-cat-tab" data-cat="books">Books</button>
+    <button class="gd-mp-cat-tab" data-cat="tools">Tools</button>
+  </div>
+
+  <main style="max-width:980px;margin:18px auto;padding:0 12px">
+    <div class="gd-marketplace-controls"><div aria-live="polite"></div></div>
+    <section id="gd-mp-grid" class="gd-market-grid">
+      <!-- sample items -->
+      <article class="gd-market-item" data-id="1" data-sku="sku-1">
+        <div class="gd-market-image"><img src="https://picsum.photos/seed/1/400/400" alt="Item 1"></div>
+        <div class="gd-market-head"><strong>Handmade Notebook</strong><span class="gd-market-price">$9.99</span></div>
+        <p>Beautifully bound lined notebook.</p>
+        <button class="gd-market-add-to-cart gd-market-add-to-cart" data-id="1">Add</button>
+      </article>
+      <article class="gd-market-item" data-id="2" data-sku="sku-2">
+        <div class="gd-market-image"><img src="https://picsum.photos/seed/2/400/400" alt="Item 2"></div>
+        <div class="gd-market-head"><strong>Hand Tool Set</strong><span class="gd-market-price">$29.95</span></div>
+        <p>Durable hand tool kit for home projects.</p>
+        <button class="gd-market-add-to-cart gd-market-add-to-cart" data-id="2">Add</button>
+      </article>
+      <article class="gd-market-item" data-id="3" data-sku="sku-3">
+        <div class="gd-market-image"><img src="https://picsum.photos/seed/3/400/400" alt="Item 3"></div>
+        <div class="gd-market-head"><strong>Art Print</strong><span class="gd-market-price">$14.50</span></div>
+        <p>Limited edition art print.</p>
+        <button class="gd-market-add-to-cart gd-market-add-to-cart" data-id="3">Add</button>
+      </article>
+    </section>
+  </main>
+
+  <div id="gd-mp-drawer" class="gd-mp-drawer" aria-hidden="true">
+    <div class="gd-mp-drawer-inner">
+      <button class="gd-mp-drawer-close">Close</button>
+      <nav class="gd-mp-drawer-nav">
+        <ul>
+          <li><a href="#">My Orders</a></li>
+          <li><a href="#">Account</a></li>
+          <li><a href="#">Settings</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <div class="gd-mp-bottom-nav">
+    <button class="gd-mp-bottom-btn gd-mp-bottom-home"><span class="icon">🏠</span><span class="label">Home</span></button>
+    <button class="gd-mp-bottom-btn gd-mp-bottom-search"><span class="icon">🔎</span><span class="label">Search</span></button>
+    <button class="gd-mp-bottom-btn gd-mp-bottom-cart"><span class="icon">🛒</span><span class="label">Cart</span><span class="gd-mp-cart-count">0</span></button>
+    <button class="gd-mp-bottom-btn gd-mp-bottom-orders"><span class="icon">📦</span><span class="label">Orders</span></button>
+    <button class="gd-mp-bottom-btn gd-mp-bottom-account"><span class="icon">👤</span><span class="label">Account</span></button>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="assets/native-bridge.js"></script>
+  <script src="assets/marketplace.js"></script>
+
+  <!-- Local test helpers: mock AJAX and initialize cart count -->
+  <script>
+    // Mock $.post for add-to-cart to always succeed
+    (function(){
+      var origPost = $.post;
+      $.post = function(url, data, success, dataType){
+        // simulate async success for add-to-cart actions
+        if (data && (data.action === 'gd_client_portal_marketplace_add_to_cart' || data.action === 'gd_client_portal_marketplace_create_paystack_checkout')){
+          setTimeout(function(){
+            var resp = { success: true, data: { message: 'Added to cart', cart_count: (parseInt($('.gd-mp-cart-count').text()||'0',10)||0) + 1 } };
+            if (typeof success === 'function') success(resp);
+          }, 300);
+          return {
+            fail: function(){}
+          };
+        }
+        return origPost.apply(this, arguments);
+      };
+
+      // Mock $.get for cart count
+      var origGet = $.get;
+      $.get = function(url, data, success, dataType){
+        if (data && data.action === 'gd_client_portal_marketplace_get_cart_count'){
+          setTimeout(function(){ if (typeof success === 'function') success({ success: true, data: { cart_count: 0 } }); }, 50);
+          return { fail: function(){} };
+        }
+        return origGet.apply(this, arguments);
+      };
+    })();
+
+    // Example: let native bridge update the cart after 2s
+    setTimeout(function(){ if (window.updateCartCount) window.updateCartCount(2); }, 2000);
+  </script>
+</body>
+</html>

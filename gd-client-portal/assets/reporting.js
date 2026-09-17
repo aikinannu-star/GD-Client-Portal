@@ -1,0 +1,1 @@
+document.addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('.gd-report-export').forEach(a=>a.addEventListener('click',()=>{a.classList.add('is-loading');setTimeout(()=>a.classList.remove('is-loading'),900)}));});

@@ -1,0 +1,7 @@
+# Upgrade & Rollback Readiness — v7.6.0
+
+This release adds a read-only Upgrade & Rollback Readiness screen to support safer deployment decisions.
+
+It verifies runtime health, version/schema metadata, core database availability, writable storage, and production certification evidence.
+
+It does not execute migrations or backups automatically. The administrator retains control over upgrade, backup, and rollback operations.

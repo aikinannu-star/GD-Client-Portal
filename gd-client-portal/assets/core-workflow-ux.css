@@ -1,0 +1,22 @@
+
+.gdcp-project-workspace{max-width:1180px;margin:20px auto}
+.gdcp-project-workspace__header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:22px}
+.gdcp-project-workspace__header h2{margin:0 0 6px}
+.gdcp-project-workspace__header p{margin:0;opacity:.75}
+.gdcp-project-count{padding:7px 12px;border-radius:999px;background:#f0f0f1;font-weight:600;white-space:nowrap}
+.gdcp-project-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px}
+.gdcp-project-card{border:1px solid #dcdcde;border-radius:8px;padding:20px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.gdcp-project-card__top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.gdcp-project-card h3{margin:0 0 6px}
+.gdcp-project-stage{margin:0;opacity:.72}
+.gdcp-project-status{font-size:12px;font-weight:600;padding:4px 9px;border-radius:999px;background:#e9eaeb;white-space:nowrap}
+.gdcp-project-progress{margin:22px 0}
+.gdcp-project-progress__labels{display:flex;justify-content:space-between;margin-bottom:7px;font-size:13px}
+.gdcp-project-progress__bar{height:8px;border-radius:999px;background:#e9eaeb;overflow:hidden}
+.gdcp-project-progress__bar span{display:block;height:100%;background:#2271b1;border-radius:999px}
+.gdcp-project-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 20px}
+.gdcp-project-meta div{padding:10px;background:#f6f7f7;border-radius:5px}
+.gdcp-project-meta dt{font-size:12px;opacity:.7}
+.gdcp-project-meta dd{margin:4px 0 0;font-weight:600}
+.gdcp-project-empty{text-align:center;padding:48px 20px;border:1px dashed #a7aaad;border-radius:8px;background:#fff}
+@media(max-width:600px){.gdcp-project-workspace__header{display:block}.gdcp-project-count{display:inline-block;margin-top:12px}.gdcp-project-meta{grid-template-columns:1fr}}

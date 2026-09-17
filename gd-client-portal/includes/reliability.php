@@ -1,0 +1,15 @@
+<?php
+/** GD Client Portal v4.7 - Automation Reliability Center. */
+if (!defined('ABSPATH')) exit;
+function gd_client_portal_reliability_admin(){
+ if(!gd_client_portal_user_can_access_admin()) wp_die('Access denied.'); 
+ if(isset($_GET['gdcp_retry_queue'])&&check_admin_referer('gdcp_retry_queue_'.absint($_GET['gdcp_retry_queue']))){$id=absint($_GET['gdcp_retry_queue']);if(gdcp_automation_service()->retry_queue($id)){wp_schedule_single_event(time()+2,'gd_client_portal_automation_queue_runner',array($id));echo '<div class="notice notice-success"><p>Queue item requeued.</p></div>';}}
+ if(isset($_GET['gdcp_cancel_queue'])&&check_admin_referer('gdcp_cancel_queue_'.absint($_GET['gdcp_cancel_queue']))){$id=absint($_GET['gdcp_cancel_queue']);if(gdcp_automation_service()->cancel_queue($id))echo '<div class="notice notice-success"><p>Queue item cancelled.</p></div>'; }
+ $stats=gdcp_automation_service()->stats();
+ $rows=gdcp_automation_service()->list_queue(100);
+ echo '<div class="wrap"><h1>Automation Reliability Center</h1><p>Monitor queue health, recover stale executions and manually requeue failed actions.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0">';foreach($stats as $k=>$v)echo '<div style="background:#fff;border:1px solid #dcdcde;border-radius:10px;padding:16px"><strong style="font-size:25px">'.intval($v).'</strong><br>'.esc_html(ucfirst($k)).'</div>';echo '</div><p><a class="button button-primary" href="'.esc_url(wp_nonce_url(admin_url('admin.php?page=gd-client-portal-reliability&recover=1'),'gdcp_reliability_recover')).'">Recover stale queue</a></p><table class="widefat striped"><thead><tr><th>ID</th><th>Workflow</th><th>Project</th><th>Status</th><th>Attempts</th><th>Run at</th><th>Last error</th><th>Actions</th></tr></thead><tbody>';
+ foreach($rows as $r){$rule=gd_client_portal_automation_get_rule($r->rule_id);$retry=wp_nonce_url(admin_url('admin.php?page=gd-client-portal-reliability&gdcp_retry_queue='.$r->id),'gdcp_retry_queue_'.$r->id);$cancel=wp_nonce_url(admin_url('admin.php?page=gd-client-portal-reliability&gdcp_cancel_queue='.$r->id),'gdcp_cancel_queue_'.$r->id);echo '<tr><td>#'.intval($r->id).'</td><td>'.esc_html($rule?$rule->name:'Deleted workflow').'</td><td>#'.intval($r->project_id).'</td><td>'.esc_html($r->status).'</td><td>'.intval($r->attempts).' / '.intval($r->max_attempts).'</td><td>'.esc_html($r->run_at).'</td><td>'.esc_html($r->last_error?:'—').'</td><td>'.($r->status==='failed'?'<a class="button" href="'.esc_url($retry).'">Retry</a> ':'').($r->status==='queued'||$r->status==='running'?'<a class="button" href="'.esc_url($cancel).'">Cancel</a>':'').'</td></tr>';}
+ if(!$rows)echo '<tr><td colspan="8">No automation queue records.</td></tr>';echo '</tbody></table></div>';
+ if(isset($_GET['recover'])&&check_admin_referer('gdcp_reliability_recover'))do_action('gd_client_portal_automation_reliability_tick');
+}
+add_action('admin_menu',function(){add_submenu_page('gd-client-portal','Automation Reliability','Automation Reliability','gd_client_portal_access_admin','gd-client-portal-reliability','gd_client_portal_reliability_admin');},24);

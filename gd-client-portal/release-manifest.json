@@ -1,0 +1,12 @@
+{
+  "name": "GD Client Portal",
+  "version": "7.6.0",
+  "release_type": "production-governance",
+  "artifact": "gd-client-portal-v7.6.0-release-governance.zip",
+  "generated_utc": "2026-09-13T23:30:16+00:00",
+  "validation": {
+    "php_syntax": "passed (112 PHP files)",
+    "zip_integrity": "pending",
+    "single_plugin_root": "pending"
+  }
+}

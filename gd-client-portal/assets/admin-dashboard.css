@@ -1,0 +1,41 @@
+/* GD Client Portal — unified WordPress admin experience. */
+.gdcp-admin-screen #wpcontent{background:#f6f8fb;}
+.gdcp-admin-screen #wpbody-content{padding-bottom:40px;}
+.gdcp-admin-screen .wrap{max-width:1280px;margin:0 auto;padding:8px 20px 32px;box-sizing:border-box;}
+.gdcp-admin-screen .wrap>h1:first-child{font-size:28px;line-height:1.2;margin:18px 0 8px;font-weight:700;letter-spacing:-.02em;}
+.gdcp-admin-screen .wrap>p:first-of-type{color:#64748b;}
+.gdcp-admin-screen .gdcp-admin-page{max-width:1280px;margin:0 auto;padding:8px 20px 32px;box-sizing:border-box;}
+.gdcp-admin-screen .gdcp-admin-page__header{margin:18px 0 22px;padding:0 0 18px;border-bottom:1px solid #e2e8f0;}
+.gdcp-admin-screen .gdcp-admin-page__header h1{font-size:28px;letter-spacing:-.02em;}
+.gdcp-admin-screen .gdcp-admin-section,.gdcp-admin-screen .postbox,.gdcp-admin-screen .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 2px 8px rgba(15,23,42,.04);}
+.gdcp-admin-screen .gdcp-admin-section{padding:22px 24px;margin:16px 0;}
+.gdcp-admin-screen .postbox{overflow:hidden;margin:16px 0;}
+.gdcp-admin-screen .postbox .hndle,.gdcp-admin-screen .postbox>h2{padding:15px 20px;margin:0;border-bottom:1px solid #edf1f5;font-size:15px;}
+.gdcp-admin-screen .postbox .inside{padding:20px;}
+.gdcp-admin-screen table.widefat{border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 2px 8px rgba(15,23,42,.03);overflow:hidden;background:#fff;}
+.gdcp-admin-screen table.widefat thead th{background:#f8fafc;color:#475569;font-weight:600;border-bottom:1px solid #e2e8f0;}
+.gdcp-admin-screen table.widefat td,.gdcp-admin-screen table.widefat th{padding:11px 13px;vertical-align:middle;}
+.gdcp-admin-screen table.widefat tbody tr:hover{background:#f8fafc;}
+.gdcp-admin-screen form input[type=text],.gdcp-admin-screen form input[type=email],.gdcp-admin-screen form input[type=password],.gdcp-admin-screen form input[type=number],.gdcp-admin-screen form input[type=url],.gdcp-admin-screen form select,.gdcp-admin-screen form textarea{border-color:#cbd5e1;border-radius:7px;box-shadow:none;min-height:38px;}
+.gdcp-admin-screen form textarea{min-height:100px;}
+.gdcp-admin-screen form input:focus,.gdcp-admin-screen form select:focus,.gdcp-admin-screen form textarea:focus{border-color:#0f766e;box-shadow:0 0 0 1px #0f766e;outline:none;}
+.gdcp-admin-screen .button{border-radius:7px;min-height:36px;padding:0 13px;}
+.gdcp-admin-screen .button-primary{background:#0f766e;border-color:#0f766e;box-shadow:none;text-shadow:none;}
+.gdcp-admin-screen .button-primary:hover,.gdcp-admin-screen .button-primary:focus{background:#115e59;border-color:#115e59;}
+.gdcp-admin-screen .notice{border-radius:9px;margin:16px 0;box-shadow:none;}
+.gdcp-admin-screen .notice.inline{margin-left:0;margin-right:0;}
+.gdcp-admin-screen .gdcp-empty-state{background:#fff;border-color:#cbd5e1;border-radius:12px;box-shadow:0 2px 8px rgba(15,23,42,.03);}
+.gdcp-admin-screen .gdcp-status{font-size:11px;letter-spacing:.02em;}
+.gdcp-admin-screen .nav-tab-wrapper{border-bottom:1px solid #dbe3ec;margin:20px 0 0;}
+.gdcp-admin-screen .nav-tab{border:1px solid transparent;border-bottom:0;border-radius:8px 8px 0 0;background:transparent;padding:9px 13px;font-weight:600;}
+.gdcp-admin-screen .nav-tab:hover{background:#eef6f5;}
+.gdcp-admin-screen .nav-tab-active,.gdcp-admin-screen .nav-tab-active:focus,.gdcp-admin-screen .nav-tab-active:hover{background:#fff;border-color:#dbe3ec;color:#0f766e;}
+.gdcp-admin-screen .gdcp-workspace-notice{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #dbe3ec;border-left:4px solid #0f766e;border-radius:10px;padding:12px 16px;margin:14px 0 20px;box-shadow:0 2px 8px rgba(15,23,42,.03);}
+.gdcp-admin-screen .gdcp-workspace-notice p{margin:0 0 3px;}
+.gdcp-admin-screen .gdcp-workspace-notice p:last-child{margin-bottom:0;color:#64748b;}
+.gdcp-admin-screen .gdcp-admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;}
+.gdcp-admin-screen .gdcp-admin-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(15,23,42,.04);}
+.gdcp-admin-screen .gdcp-admin-card h2,.gdcp-admin-screen .gdcp-admin-card h3{margin-top:0;}
+.gdcp-admin-screen .gdcp-kpi{font-size:26px;font-weight:700;line-height:1.15;margin:6px 0;}
+.gdcp-admin-screen .gdcp-muted{color:#64748b;}
+@media(max-width:782px){.gdcp-admin-screen .wrap,.gdcp-admin-screen .gdcp-admin-page{padding-left:12px;padding-right:12px}.gdcp-admin-screen .wrap>h1:first-child,.gdcp-admin-screen .gdcp-admin-page__header h1{font-size:24px}.gdcp-admin-screen .gdcp-admin-section{padding:17px}.gdcp-admin-screen table.widefat{display:block;overflow-x:auto;white-space:nowrap}.gdcp-admin-screen .gdcp-workspace-notice{display:block}.gdcp-admin-screen .gdcp-workspace-notice p{margin-bottom:6px}}
