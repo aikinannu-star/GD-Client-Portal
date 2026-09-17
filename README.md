@@ -1,5 +1,9 @@
 # GD Client Portal
 
+GD Client Portal WordPress Plugin
+
+## Project Structure
+
 This scaffold now uses a modular structure with:
 
 - includes/ for shared helpers, URLs, security, assets, and installer logic
