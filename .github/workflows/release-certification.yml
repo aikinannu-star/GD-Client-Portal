@@ -1,0 +1,167 @@
+name: Release Candidate Certification
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  runtime-gate:
+    name: Release runtime gate (PHP 8.4 / WordPress latest)
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: wordpress_test
+          MYSQL_USER: wp_test
+          MYSQL_PASSWORD: wp_test
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=15
+    env:
+      WP_TESTS_DIR: /tmp/wordpress-tests-lib
+      WP_CORE_DIR: /tmp/wordpress
+      WP_DB_NAME: wordpress_test
+      WP_DB_USER: wp_test
+      WP_DB_PASSWORD: wp_test
+      WP_DB_HOST: 127.0.0.1:3306
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: composer:v2,svn
+      
+      - name: Install Composer dependencies
+        working-directory: gd-client-portal
+        run: composer install --no-interaction --prefer-dist --no-progress
+      
+      - name: Validate PHP syntax
+        working-directory: gd-client-portal
+        run: composer run test:syntax
+      
+      - name: Run standalone regression contracts
+        working-directory: gd-client-portal
+        run: tests/run-standalone-regressions.sh
+      
+      - name: Wait for MySQL
+        run: |
+          for i in {1..40}; do
+            mysqladmin ping -h 127.0.0.1 -P 3306 -u root -proot --silent && exit 0
+            sleep 2
+          done
+          echo "MySQL did not become ready."
+          exit 1
+      
+      - name: Install WordPress test environment
+        working-directory: gd-client-portal
+        env:
+          WP_VERSION: latest
+        run: |
+          chmod +x bin/install-wp-tests.sh
+          bin/install-wp-tests.sh "$WP_DB_NAME" "$WP_DB_USER" "$WP_DB_PASSWORD" "$WP_DB_HOST" "$WP_VERSION"
+      
+      - name: Verify WordPress test environment
+        run: |
+          test -f "$WP_TESTS_DIR/includes/functions.php"
+          test -f "$WP_TESTS_DIR/includes/bootstrap.php"
+          test -f "$WP_TESTS_DIR/wp-tests-config.php"
+          test -d "$WP_CORE_DIR"
+      
+      - name: Run PHPUnit
+        working-directory: gd-client-portal
+        run: |
+          set -o pipefail
+          vendor/bin/phpunit -c phpunit.xml.dist --testdox | tee ../phpunit-release-results.txt
+      
+      - name: Enforce PHPUnit success
+        run: |
+          grep -Eq 'OK \(|Tests: [0-9]+' phpunit-release-results.txt
+      
+      - name: Upload release runtime results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-runtime-results
+          path: phpunit-release-results.txt
+          if-no-files-found: ignore
+
+  package:
+    needs: runtime-gate
+    name: Build and verify canonical plugin package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: composer:v2
+
+      - name: Install Composer dependencies
+        working-directory: gd-client-portal
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Validate PHP syntax
+        working-directory: gd-client-portal
+        run: composer run test:syntax
+
+      - name: Run standalone regression contracts
+        working-directory: gd-client-portal
+        run: tests/run-standalone-regressions.sh
+
+      - name: Verify plugin metadata
+        working-directory: gd-client-portal
+        run: |
+          test -f gd-client-portal.php
+          grep -q 'Stable tag:' readme.txt || true
+          grep -q 'GD Client Portal' gd-client-portal.php
+
+      - name: Build canonical ZIP
+        run: |
+          rm -rf /tmp/package
+          mkdir -p /tmp/package
+          cp -a gd-client-portal /tmp/package/gd-client-portal
+          rm -rf /tmp/package/gd-client-portal/.git /tmp/package/gd-client-portal/vendor
+          cd /tmp/package
+          zip -qr "$GITHUB_WORKSPACE/gd-client-portal-release-candidate.zip" gd-client-portal
+
+      - name: Verify ZIP structure
+        run: |
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import PurePosixPath
+          z=zipfile.ZipFile('gd-client-portal-release-candidate.zip')
+          names=[n for n in z.namelist() if not n.endswith('/')]
+          assert names, 'empty archive'
+          assert all(n.startswith('gd-client-portal/') for n in names), 'non-canonical archive root'
+          assert 'gd-client-portal/gd-client-portal.php' in names, 'main plugin file missing'
+          assert not any(PurePosixPath(n).is_absolute() for n in names), 'absolute archive path found'
+          assert not any('..' in PurePosixPath(n).parts for n in names), 'path traversal entry found'
+          print(f'Canonical ZIP verified: {len(names)} files')
+          PY
+
+      - name: Generate SHA-256
+        run: sha256sum gd-client-portal-release-candidate.zip | tee release-sha256.txt
+
+      - name: Upload release candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: gd-client-portal-release-candidate
+          path: |
+            gd-client-portal-release-candidate.zip
+            release-sha256.txt

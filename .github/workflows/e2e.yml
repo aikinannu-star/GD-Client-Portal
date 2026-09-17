@@ -1,5 +1,9 @@
 name: E2E Tests
 
+# This workflow is separate from the release certification gate.
+# E2E tests validate client-side functionality in a browser environment.
+# For release certification, see release-certification.yml which runs PHPUnit.
+
 on:
   push:
     branches: [ main, master ]
@@ -8,6 +12,7 @@ on:
 
 jobs:
   playwright-e2e:
+    name: Playwright E2E Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
