@@ -60,7 +60,9 @@ jobs:
 
       - name: Run standalone regression contracts
         working-directory: gd-client-portal
-        run: tests/run-standalone-regressions.sh
+        run: |
+          chmod +x tests/run-standalone-regressions.sh
+          tests/run-standalone-regressions.sh
 
       - name: Wait for MySQL
         run: |

@@ -1,0 +1,3 @@
+# Preserve execute permissions for shell scripts
+*.sh text eol=lf -delta
+bin/** text eol=lf -delta
