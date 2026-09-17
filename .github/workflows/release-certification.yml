@@ -71,13 +71,24 @@ jobs:
           echo "MySQL did not become ready."
           exit 1
       
+      - name: Verify MySQL database
+        run: |
+          mysql -h 127.0.0.1 -u root -proot -e "SELECT 1;" || exit 1
+          echo "MySQL is ready and accessible"
+      
       - name: Install WordPress test environment
         working-directory: gd-client-portal
         env:
           WP_VERSION: latest
         run: |
           chmod +x bin/install-wp-tests.sh
-          bin/install-wp-tests.sh "$WP_DB_NAME" "$WP_DB_USER" "$WP_DB_PASSWORD" "$WP_DB_HOST" "$WP_VERSION"
+          set -o pipefail
+          bin/install-wp-tests.sh "$WP_DB_NAME" "$WP_DB_USER" "$WP_DB_PASSWORD" "$WP_DB_HOST" "$WP_VERSION" 2>&1 | tee /tmp/wp-install.log
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            echo "WordPress install failed. Log:"
+            cat /tmp/wp-install.log
+            exit 1
+          fi
       
       - name: Verify WordPress test environment
         run: |
