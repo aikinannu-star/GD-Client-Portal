@@ -114,6 +114,20 @@ jobs:
           echo "=== Database connectivity ==="
           mysql -h 127.0.0.1 -P 3306 -u "$WP_DB_USER" -p"$WP_DB_PASSWORD" -e "SELECT DATABASE(), USER(), @@hostname, @@port;" "$WP_DB_NAME" || true
 
+      - name: Inspect WordPress core files and install log
+        working-directory: gd-client-portal
+        run: |
+          echo "=== WP core dir: $WP_CORE_DIR ==="
+          ls -la "$WP_CORE_DIR" || true
+          echo "=== WP wp-includes dir ==="
+          ls -la "$WP_CORE_DIR/wp-includes" || true
+          echo "=== Tail of /tmp/wp-install.log (if present) ==="
+          if [ -f /tmp/wp-install.log ]; then
+            tail -n 200 /tmp/wp-install.log || true
+          else
+            echo "/tmp/wp-install.log not found"
+          fi
+
       - name: Verify test environment
         run: |
           test -f "$WP_TESTS_DIR/includes/functions.php"
