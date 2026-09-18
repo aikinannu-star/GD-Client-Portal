@@ -153,7 +153,14 @@ jobs:
         run: |
           rm -rf /tmp/package
           mkdir -p /tmp/package
-          cp -a gd-client-portal /tmp/package/gd-client-portal
+          # If the repository contains a nested plugin directory (gd-client-portal/gd-client-portal),
+          # package the inner directory contents as the canonical plugin root. Otherwise package
+          # the top-level gd-client-portal directory.
+          if [ -d gd-client-portal/gd-client-portal ]; then
+            cp -a gd-client-portal/gd-client-portal /tmp/package/gd-client-portal
+          else
+            cp -a gd-client-portal /tmp/package/gd-client-portal
+          fi
           rm -rf /tmp/package/gd-client-portal/.git /tmp/package/gd-client-portal/vendor
           cd /tmp/package
           zip -qr "$GITHUB_WORKSPACE/gd-client-portal-release-candidate.zip" gd-client-portal
