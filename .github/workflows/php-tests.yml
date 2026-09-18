@@ -97,6 +97,23 @@ jobs:
             exit 1
           fi
 
+      - name: Inspect generated WordPress test configuration
+        working-directory: gd-client-portal
+        env:
+          WP_DB_NAME: ${{ env.WP_DB_NAME }}
+          WP_DB_USER: ${{ env.WP_DB_USER }}
+          WP_DB_PASSWORD: ${{ env.WP_DB_PASSWORD }}
+          WP_DB_HOST: ${{ env.WP_DB_HOST }}
+        run: |
+          echo "=== wp-tests-config.php database configuration (without password) ==="
+          # Show key config lines except password
+          grep -nE "ABSPATH|dbhost|dbname|dbuser|table_prefix" "$WP_TESTS_DIR/wp-tests-config.php" || true
+          echo "=== dbpass (redacted) ==="
+          grep -nE "dbpass" "$WP_TESTS_DIR/wp-tests-config.php" | sed -E "s/(dbpass'\\s*=>\\s*)(['\"]).+\\2/\1'REDACTED'/" || true
+
+          echo "=== Database connectivity ==="
+          mysql -h 127.0.0.1 -P 3306 -u "$WP_DB_USER" -p"$WP_DB_PASSWORD" -e "SELECT DATABASE(), USER(), @@hostname, @@port;" "$WP_DB_NAME" || true
+
       - name: Verify test environment
         run: |
           test -f "$WP_TESTS_DIR/includes/functions.php"
