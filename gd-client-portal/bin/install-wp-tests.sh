@@ -35,14 +35,13 @@ define( 'WP_TESTS_EMAIL', 'admin@example.org' );
 define( 'WP_TESTS_TITLE', 'GD Client Portal Tests' );
 define( 'WP_PHP_BINARY', 'php' );
 
-\$GLOBALS['wp_tests_options'] = array(
-    'dbhost' => '${DB_HOST}',
-    'dbname' => '${DB_NAME}',
-    'dbuser' => '${DB_USER}',
-    'dbpass' => '${DB_PASS}',
-);
+// Define DB constants expected by WordPress test bootstrap.
+define( 'DB_NAME', '${DB_NAME}' );
+define( 'DB_USER', '${DB_USER}' );
+define( 'DB_PASSWORD', '${DB_PASS}' );
+define( 'DB_HOST', '${DB_HOST}' );
 
-# Table prefix used by tests. Ensure it's defined to avoid undefined variable in bootstrap.
+// Table prefix used by tests. Ensure it's defined to avoid undefined variable in bootstrap.
 \$table_prefix = 'wp_';
 PHP
 
