@@ -41,7 +41,8 @@ define( 'WP_PHP_BINARY', 'php' );
     'dbuser' => '${DB_USER}',
     'dbpass' => '${DB_PASS}',
 );
-\n+# Table prefix used by tests. Ensure it's defined to avoid undefined variable in bootstrap.
+
+# Table prefix used by tests. Ensure it's defined to avoid undefined variable in bootstrap.
 \$table_prefix = 'wp_';
 PHP
 
