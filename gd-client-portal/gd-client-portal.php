@@ -33,6 +33,14 @@ if (!defined('GD_CLIENT_PORTAL_URL')) {
 function gd_client_portal_safe_require($file, $label = '')
 {
     if (!is_string($file) || !is_file($file)) return false;
+
+    // Optional compatibility protection for legacy module files.
+    $base = basename($file);
+    $base_l = strtolower($base);
+    if (($base_l === 'billing-service.php' || $base_l === 'billingservice.php') && class_exists('GDCP_Billing_Service', false)) {
+        return true;
+    }
+
     try {
         require_once $file;
         if (class_exists('GDCP_Application_Kernel')) { GDCP_Application_Kernel::record_loaded($label ?: basename($file), $file); }
@@ -104,7 +112,6 @@ function gd_client_portal_bootstrap()
         'app/Services/ApprovalService.php',
         'app/Services/OnboardingService.php',
         'app/Services/TenantService.php',
-        'app/Services/BillingService.php',
         'app/Services/DocumentService.php',
         'app/Services/SupportService.php',
         'app/Services/AuthorizationService.php',
