@@ -21,9 +21,11 @@ fi
 
 curl -fsSL "$WP_DOWNLOAD" | tar xz --strip-components=1 -C "$WP_CORE_DIR"
 
-# Verify WordPress core was extracted correctly.
-if [ ! -f "$WP_CORE_DIR/wp-includes/class-wp-phpmailer.php" ]; then
-  echo "ERROR: WordPress core does not provide class-wp-phpmailer.php" >&2
+# Verify WordPress core was extracted correctly. The PHPMailer filename
+# differs between WordPress releases; accept either variant but ensure
+# core was extracted by checking version.php.
+if [ ! -f "$WP_CORE_DIR/wp-includes/version.php" ]; then
+  echo "ERROR: WordPress core was not extracted correctly" >&2
   echo "Listing $WP_CORE_DIR:" >&2
   ls -la "$WP_CORE_DIR" || true
   echo "Listing $WP_CORE_DIR/wp-includes:" >&2
@@ -31,9 +33,15 @@ if [ ! -f "$WP_CORE_DIR/wp-includes/class-wp-phpmailer.php" ]; then
   echo "Dumping /tmp/wp-install.log (if present):" >&2
   if [ -f /tmp/wp-install.log ]; then
     tail -n 200 /tmp/wp-install.log >&2 || true
-  else
-    echo "/tmp/wp-install.log not present" >&2
   fi
+  exit 1
+fi
+
+if [ ! -f "$WP_CORE_DIR/wp-includes/class-wp-phpmailer.php" ] && \
+   [ ! -f "$WP_CORE_DIR/wp-includes/class-phpmailer.php" ]; then
+  echo "ERROR: WordPress core does not contain a recognized PHPMailer implementation" >&2
+  echo "Listing $WP_CORE_DIR/wp-includes:" >&2
+  ls -la "$WP_CORE_DIR/wp-includes" || true
   exit 1
 fi
 
