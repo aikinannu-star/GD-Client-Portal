@@ -21,6 +21,22 @@ fi
 
 curl -fsSL "$WP_DOWNLOAD" | tar xz --strip-components=1 -C "$WP_CORE_DIR"
 
+# Verify WordPress core was extracted correctly.
+if [ ! -f "$WP_CORE_DIR/wp-includes/class-wp-phpmailer.php" ]; then
+  echo "ERROR: expected WP core file missing: $WP_CORE_DIR/wp-includes/class-wp-phpmailer.php" >&2
+  echo "Listing $WP_CORE_DIR:" >&2
+  ls -la "$WP_CORE_DIR" || true
+  echo "Listing $WP_CORE_DIR/wp-includes:" >&2
+  ls -la "$WP_CORE_DIR/wp-includes" || true
+  echo "Dumping /tmp/wp-install.log (if present):" >&2
+  if [ -f /tmp/wp-install.log ]; then
+    tail -n 200 /tmp/wp-install.log >&2 || true
+  else
+    echo "/tmp/wp-install.log not present" >&2
+  fi
+  exit 1
+fi
+
 # Export the official test suite directories with their expected layout.
 svn export --quiet https://develop.svn.wordpress.org/trunk/tests/phpunit/includes \
   "$WP_TESTS_DIR/includes"
