@@ -23,30 +23,32 @@ curl -fsSL "$WP_DOWNLOAD" | tar xz --strip-components=1 -C "$WP_CORE_DIR"
 
 # Verify WordPress core was extracted correctly.
 if [ ! -f "$WP_CORE_DIR/wp-includes/class-wp-phpmailer.php" ]; then
-  # Some WP releases include class-phpmailer.php instead of class-wp-phpmailer.php.
-  if [ -f "$WP_CORE_DIR/wp-includes/class-phpmailer.php" ]; then
-    echo "Compatibility: copying class-phpmailer.php -> class-wp-phpmailer.php" >&2
-    cp "$WP_CORE_DIR/wp-includes/class-phpmailer.php" "$WP_CORE_DIR/wp-includes/class-wp-phpmailer.php" || true
+  echo "ERROR: WordPress core does not provide class-wp-phpmailer.php" >&2
+  echo "Listing $WP_CORE_DIR:" >&2
+  ls -la "$WP_CORE_DIR" || true
+  echo "Listing $WP_CORE_DIR/wp-includes:" >&2
+  ls -la "$WP_CORE_DIR/wp-includes" || true
+  echo "Dumping /tmp/wp-install.log (if present):" >&2
+  if [ -f /tmp/wp-install.log ]; then
+    tail -n 200 /tmp/wp-install.log >&2 || true
   else
-    echo "ERROR: expected WP core file missing: $WP_CORE_DIR/wp-includes/class-wp-phpmailer.php" >&2
-    echo "Listing $WP_CORE_DIR:" >&2
-    ls -la "$WP_CORE_DIR" || true
-    echo "Listing $WP_CORE_DIR/wp-includes:" >&2
-    ls -la "$WP_CORE_DIR/wp-includes" || true
-    echo "Dumping /tmp/wp-install.log (if present):" >&2
-    if [ -f /tmp/wp-install.log ]; then
-      tail -n 200 /tmp/wp-install.log >&2 || true
-    else
-      echo "/tmp/wp-install.log not present" >&2
-    fi
-    exit 1
+    echo "/tmp/wp-install.log not present" >&2
   fi
+  exit 1
 fi
 
-# Export the official test suite directories with their expected layout.
-svn export --quiet https://develop.svn.wordpress.org/trunk/tests/phpunit/includes \
+# Use a test suite compatible with the downloaded WordPress core.
+if [ "$WP_VERSION" = "latest" ]; then
+  WP_TESTS_REF="trunk"
+else
+  WP_TESTS_REF="branches/${WP_VERSION}"
+fi
+
+WP_TESTS_SVN_BASE="https://develop.svn.wordpress.org/${WP_TESTS_REF}/tests/phpunit"
+
+svn export --quiet "${WP_TESTS_SVN_BASE}/includes" \
   "$WP_TESTS_DIR/includes"
-svn export --quiet https://develop.svn.wordpress.org/trunk/tests/phpunit/data \
+svn export --quiet "${WP_TESTS_SVN_BASE}/data" \
   "$WP_TESTS_DIR/data"
 
 cat > "$WP_TESTS_DIR/wp-tests-config.php" <<PHP
