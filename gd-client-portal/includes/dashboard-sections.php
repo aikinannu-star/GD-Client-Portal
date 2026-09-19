@@ -8,59 +8,89 @@ if (!defined('ABSPATH')) {
 }
 
 if (!function_exists('gd_client_portal_render_placeholder_shortcode')) {
+    /**
+     * Live fallback summary for modules that do not expose a dedicated shortcode.
+     * Never uses fabricated counts, names, dates, or statuses.
+     */
     function gd_client_portal_render_placeholder_shortcode($atts = array(), $content = null, $tag = '')
     {
         $module = isset($atts['module']) ? sanitize_key($atts['module']) : sanitize_key(str_replace(array('gd_', '_ui'), array('', ''), $tag ?: 'module'));
-
-        $module_labels = array(
-            'projects' => array('title' => __('Project overview', 'gd-client-portal'), 'subtitle' => __('Your current service portfolio', 'gd-client-portal'), 'status' => __('3 active projects', 'gd-client-portal')),
-            'workflow' => array('title' => __('Workflow overview', 'gd-client-portal'), 'subtitle' => __('Progress across delivery stages', 'gd-client-portal'), 'status' => __('2 tasks due soon', 'gd-client-portal')),
-            'files' => array('title' => __('Files & assets', 'gd-client-portal'), 'subtitle' => __('Shared documents and final package files', 'gd-client-portal'), 'status' => __('14 files uploaded', 'gd-client-portal')),
-            'deliverables' => array('title' => __('Deliverables', 'gd-client-portal'), 'subtitle' => __('Milestone outputs and package releases', 'gd-client-portal'), 'status' => __('5 deliverables ready', 'gd-client-portal')),
-            'messages' => array('title' => __('Inbox', 'gd-client-portal'), 'subtitle' => __('Recent team messages and updates', 'gd-client-portal'), 'status' => __('3 unread messages', 'gd-client-portal')),
-            'meetings' => array('title' => __('Meetings', 'gd-client-portal'), 'subtitle' => __('Upcoming reviews and check-ins', 'gd-client-portal'), 'status' => __('2 meetings this week', 'gd-client-portal')),
-            'support' => array('title' => __('Support centre', 'gd-client-portal'), 'subtitle' => __('Tickets, help requests, and resolutions', 'gd-client-portal'), 'status' => __('1 open ticket', 'gd-client-portal')),
-            'marketplace' => array('title' => __('Marketplace', 'gd-client-portal'), 'subtitle' => __('Add-ons, services, and available offers', 'gd-client-portal'), 'status' => __('4 items available', 'gd-client-portal')),
-            'downloads' => array('title' => __('Downloads', 'gd-client-portal'), 'subtitle' => __('Files, assets, and client resources', 'gd-client-portal'), 'status' => __('3 files ready', 'gd-client-portal')),
-            'invoices' => array('title' => __('Billing overview', 'gd-client-portal'), 'subtitle' => __('Invoices, payments, and balances', 'gd-client-portal'), 'status' => __('1 payment due', 'gd-client-portal')),
-            'account' => array('title' => __('Account details', 'gd-client-portal'), 'subtitle' => __('Profile, business details, and preferences', 'gd-client-portal'), 'status' => __('Profile is current', 'gd-client-portal')),
+        $title_map = array(
+            'projects' => __('Projects', 'gd-client-portal'),
+            'workflow' => __('Workflow', 'gd-client-portal'),
+            'files' => __('Files', 'gd-client-portal'),
+            'deliverables' => __('Deliverables', 'gd-client-portal'),
+            'messages' => __('Messages', 'gd-client-portal'),
+            'meetings' => __('Meetings', 'gd-client-portal'),
+            'support' => __('Support', 'gd-client-portal'),
+            'marketplace' => __('Marketplace', 'gd-client-portal'),
+            'downloads' => __('Downloads', 'gd-client-portal'),
+            'invoices' => __('Billing', 'gd-client-portal'),
+            'account' => __('Account', 'gd-client-portal'),
         );
+        $title = $title_map[$module] ?? __('Module overview', 'gd-client-portal');
+        $tenant_id = function_exists('gd_client_portal_get_current_tenant_id') ? absint(gd_client_portal_get_current_tenant_id()) : 0;
+        $user_id = gd_client_portal_cached_current_user_id();
+        $stats = array();
 
-        $module_data = isset($module_labels[$module]) ? $module_labels[$module] : array(
-            'title' => __('Module overview', 'gd-client-portal'),
-            'subtitle' => __('This portal module is ready for your custom implementation.', 'gd-client-portal'),
-            'status' => __('Ready for updates', 'gd-client-portal'),
-        );
+        if (in_array($module, array('projects','workflow','deliverables','files'), true) && function_exists('gd_client_portal_get_visible_projects')) {
+            $projects = gd_client_portal_get_visible_projects(50);
+            $active = array_filter($projects, function($p){ return !in_array((string)($p->status ?? ''), array('completed','closed','cancelled'), true); });
+            $stats[] = array(__('Projects', 'gd-client-portal'), number_format_i18n(count($projects)));
+            $stats[] = array(__('Active', 'gd-client-portal'), number_format_i18n(count($active)));
+            if ($module === 'workflow' && !empty($active[0])) {
+                $stats[] = array(__('Current stage', 'gd-client-portal'), ucwords(str_replace('_',' ',(string)($active[0]->current_stage ?? 'Setup'))));
+            } elseif ($module === 'deliverables') {
+                $published = 0;
+                if (function_exists('gdcp_delivery_service')) foreach ($projects as $p) if (gdcp_delivery_service()->latest(absint($p->id), true)) $published++;
+                $stats[] = array(__('Published', 'gd-client-portal'), number_format_i18n($published));
+            } elseif ($module === 'files') {
+                $files = 0; foreach ($projects as $p) if (!empty($p->file_url)) $files++;
+                $stats[] = array(__('Available', 'gd-client-portal'), number_format_i18n($files));
+            } else {
+                $stats[] = array(__('Completion', 'gd-client-portal'), !empty($active[0]) ? absint($active[0]->progress ?? 0).'%' : '—');
+            }
+        } elseif ($module === 'messages' && function_exists('gdcp_message_service')) {
+            $rows = gdcp_message_service()->list_for_user($user_id, $tenant_id, function_exists('gd_client_portal_user_is_tenant_admin') && gd_client_portal_user_is_tenant_admin(), 20);
+            $stats[] = array(__('Messages', 'gd-client-portal'), number_format_i18n(count($rows)));
+            $stats[] = array(__('Latest', 'gd-client-portal'), !empty($rows[0]->created_at) ? mysql2date(get_option('date_format'), $rows[0]->created_at) : '—');
+        } elseif ($module === 'meetings' && function_exists('gdcp_calendar_service')) {
+            $events = gdcp_calendar_service()->custom_events(current_time('mysql'), gmdate('Y-m-d H:i:s', current_time('timestamp') + 30 * DAY_IN_SECONDS));
+            $stats[] = array(__('Upcoming', 'gd-client-portal'), number_format_i18n(count($events)));
+            $stats[] = array(__('Window', 'gd-client-portal'), __('Next 30 days', 'gd-client-portal'));
+        } elseif ($module === 'support' && class_exists('GDCP_Support_Repository')) {
+            $repo = new GDCP_Support_Repository();
+            $where = array('tenant_id=%d'); $params = array($tenant_id);
+            if (!function_exists('gd_client_portal_user_is_tenant_admin') || !gd_client_portal_user_is_tenant_admin()) { $where[]='user_id=%d'; $params[]=$user_id; }
+            $tickets = $repo->list_tickets($where, $params, 20);
+            $open = array_filter($tickets, function($t){ return !in_array((string)($t->status ?? ''), array('resolved','closed'), true); });
+            $stats[] = array(__('Tickets', 'gd-client-portal'), number_format_i18n(count($tickets)));
+            $stats[] = array(__('Open', 'gd-client-portal'), number_format_i18n(count($open)));
+        } elseif ($module === 'marketplace') {
+            $items = get_option('gd_client_portal_marketplace_items', array());
+            $visible = array_filter((array)$items, function($i){ return !empty($i['enabled']); });
+            $stats[] = array(__('Available', 'gd-client-portal'), number_format_i18n(count($visible)));
+            $stats[] = array(__('Updated', 'gd-client-portal'), current_time(get_option('date_format')));
+        } elseif ($module === 'invoices' && class_exists('GDCP_Billing_Repository')) {
+            $repo = new GDCP_Billing_Repository();
+            $rows = $repo->list_outstanding_for_scope($user_id, $tenant_id, function_exists('gd_client_portal_user_is_tenant_admin') && gd_client_portal_user_is_tenant_admin(), function_exists('gd_client_portal_is_platform_admin') && gd_client_portal_is_platform_admin(), 20);
+            $stats[] = array(__('Outstanding', 'gd-client-portal'), number_format_i18n(count($rows)));
+            $total = 0; foreach ($rows as $row) $total += max(0, (float)($row->total ?? 0) - (float)($row->amount_paid ?? 0));
+            $stats[] = array(__('Balance', 'gd-client-portal'), $rows ? (($rows[0]->currency ?? 'GHS').' '.number_format_i18n($total,2)) : '—');
+        } elseif ($module === 'account') {
+            $user = wp_get_current_user();
+            $stats[] = array(__('Account', 'gd-client-portal'), $user->exists() ? __('Active', 'gd-client-portal') : __('Signed out', 'gd-client-portal'));
+            $stats[] = array(__('Email', 'gd-client-portal'), $user->exists() ? $user->user_email : '—');
+        } else {
+            $stats[] = array(__('Status', 'gd-client-portal'), __('No live data available', 'gd-client-portal'));
+            $stats[] = array(__('Next step', 'gd-client-portal'), __('Open this module to view available records.', 'gd-client-portal'));
+        }
 
-        $rows = array(
-            array('label' => __('Latest update', 'gd-client-portal'), 'value' => __('Shared by the service team', 'gd-client-portal')),
-            array('label' => __('Next action', 'gd-client-portal'), 'value' => __('Review the latest item and confirm completion', 'gd-client-portal')),
-            array('label' => __('Owner', 'gd-client-portal'), 'value' => __('Client portal team', 'gd-client-portal')),
-        );
-
-        $stat_cards = array(
-            array('label' => __('Active', 'gd-client-portal'), 'value' => '4'),
-            array('label' => __('Pending', 'gd-client-portal'), 'value' => '2'),
-            array('label' => __('Updated', 'gd-client-portal'), 'value' => __('Today', 'gd-client-portal')),
-        );
-
-        $html = '<div class="gd-module-detail">';
-        $html .= '<header class="gd-module-detail-header">';
-        $html .= '<div><span class="gd-module-kicker">' . esc_html($module_data['subtitle']) . '</span><h2>' . esc_html($module_data['title']) . '</h2></div>';
-        $html .= '<span class="gd-module-status">' . esc_html($module_data['status']) . '</span>';
-        $html .= '</header>';
+        $html = '<div class="gd-module-detail gd-live-summary">';
+        $html .= '<header class="gd-module-detail-header"><div><span class="gd-module-kicker">'.esc_html__('Live account data','gd-client-portal').'</span><h2>'.esc_html($title).'</h2></div><span class="gd-module-status">'.esc_html__('Live','gd-client-portal').'</span></header>';
         $html .= '<div class="gd-module-stats">';
-        foreach ($stat_cards as $stat) {
-            $html .= '<div class="gd-module-stat"><strong>' . esc_html($stat['value']) . '</strong><span>' . esc_html($stat['label']) . '</span></div>';
-        }
-        $html .= '</div>';
-        $html .= '<div class="gd-module-table-wrap"><table class="gd-module-table"><tbody>';
-        foreach ($rows as $row) {
-            $html .= '<tr><th>' . esc_html($row['label']) . '</th><td>' . esc_html($row['value']) . '</td></tr>';
-        }
-        $html .= '</tbody></table></div>';
-        $html .= '</div>';
-
+        foreach ($stats as $stat) $html .= '<div class="gd-module-stat"><strong>'.esc_html($stat[1]).'</strong><span>'.esc_html($stat[0]).'</span></div>';
+        $html .= '</div><p class="gd-live-summary-note">'.esc_html__('This summary is generated from your current portal records. Open the module for full details.', 'gd-client-portal').'</p></div>';
         return $html;
     }
 }
