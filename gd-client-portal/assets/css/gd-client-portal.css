@@ -369,6 +369,22 @@ body {
     align-items: center;
 }
 
+.gd-card-status {
+    margin-top: 7px;
+    font-size: 0.72rem;
+    font-weight: 650;
+    color: #5d5651;
+    letter-spacing: .01em;
+}
+.gd-module-empty-state {
+    border: 1px dashed #d4ccc5;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    color: #5f5a56;
+    background: rgba(255,255,255,.12);
+}
+.gd-module-empty-state p { margin: 0; }
 .gd-card-summary {
     font-size: 0.9rem;
     line-height: 1.45;
