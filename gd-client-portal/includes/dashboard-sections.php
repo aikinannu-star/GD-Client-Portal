@@ -150,7 +150,7 @@ if (!function_exists('gd_client_portal_get_dashboard_sections')) {
                         'label' => __('Files', 'gd-client-portal'),
                         'shortcode' => '[gd_customer_files]',
                         'url' => home_url('/files/'),
-                        'url' => home_url('/files/'),
+
                         'icon' => '📄',
                         'description' => __('Access your project files securely', 'gd-client-portal'),
                     ),
@@ -159,7 +159,7 @@ if (!function_exists('gd_client_portal_get_dashboard_sections')) {
                         'label' => __('Deliverables', 'gd-client-portal'),
                         'shortcode' => '[gd_project_deliverables]',
                         'url' => home_url('/deliverables-2/'),
-                        'url' => home_url('/deliverables-2/'),
+
                         'icon' => '📦',
                         'description' => __('Review project deliverables', 'gd-client-portal'),
                     ),
@@ -175,7 +175,7 @@ if (!function_exists('gd_client_portal_get_dashboard_sections')) {
                         'label' => __('Messages', 'gd-client-portal'),
                         'shortcode' => '[gd_private_messages]',
                         'url' => home_url('/gd-client-portal-private-messages/'),
-                        'url' => home_url('/gd-client-portal-private-messages/'),
+
                         'icon' => '✉️',
                         'description' => __('Send and receive messages', 'gd-client-portal'),
                     ),
@@ -184,7 +184,7 @@ if (!function_exists('gd_client_portal_get_dashboard_sections')) {
                         'label' => __('Meetings', 'gd-client-portal'),
                         'shortcode' => '[gd_booking_calendar]',
                         'url' => home_url('/meeting/'),
-                        'url' => home_url('/meeting/'),
+
                         'icon' => '📅',
                         'description' => __('Schedule and manage meetings', 'gd-client-portal'),
                     ),
@@ -193,7 +193,7 @@ if (!function_exists('gd_client_portal_get_dashboard_sections')) {
                         'label' => __('Support', 'gd-client-portal'),
                         'shortcode' => '[gd_support_tickets]',
                         'url' => home_url('/gd-client-portal-support-tickets/'),
-                        'url' => home_url('/gd-client-portal-support-tickets/'),
+
                         'icon' => '🎟️',
                         'description' => __('Submit support tickets', 'gd-client-portal'),
                     ),
@@ -225,7 +225,7 @@ if (!function_exists('gd_client_portal_get_dashboard_sections')) {
                         'label' => __('Downloads', 'gd-client-portal'),
                         'shortcode' => '[gd_woo_downloads]',
                         'url' => home_url('/gd-client-portal-woo-downloads/'),
-                        'url' => home_url('/gd-client-portal-woo-downloads/'),
+
                         'icon' => '⬇️',
                         'description' => __('Access your digital downloads', 'gd-client-portal'),
                     ),
@@ -234,7 +234,7 @@ if (!function_exists('gd_client_portal_get_dashboard_sections')) {
                         'label' => __('Invoices', 'gd-client-portal'),
                         'shortcode' => '[gd_woo_invoices]',
                         'url' => home_url('/gd-client-portal-woo-invoice/'),
-                        'url' => home_url('/gd-client-portal-woo-invoice/'),
+
                         'icon' => '💰',
                         'description' => __('View your invoices and billing', 'gd-client-portal'),
                     ),
@@ -342,7 +342,7 @@ if (!function_exists('gd_client_portal_render_dashboard_sections')) {
                     $action_url = esc_url(add_query_arg('module', $card_id, gd_client_portal_get_dashboard_url()));
                 }
                 echo '<div class="gd-card-actions">';
-                echo '<a class="gd-btn" href="' . $action_url . '" data-module="' . esc_attr($card_id) . '"' . (empty($card['url']) ? '' : ' target="_blank" rel="noopener noreferrer"') . '>' . esc_html__('Open', 'gd-client-portal') . '</a>';
+                echo '<a class="gd-btn" href="' . $action_url . '" data-module="' . esc_attr($card_id) . '">' . esc_html__('Open', 'gd-client-portal') . '</a>';
                 echo '</div>';
                 echo '</div>';
             }
