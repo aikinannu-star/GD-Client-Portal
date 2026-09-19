@@ -2,9 +2,8 @@
 <?php
 $invoices = array();
 if (function_exists('gdcp_billing_service') && function_exists('gd_client_portal_get_current_tenant_id')) {
-    $repo = gdcp_billing_service();
-    if (method_exists($repo, 'repo')) { $invoices = array(); }
-    $invoices = $repo->repo()->list_outstanding_for_scope(get_current_user_id(), gd_client_portal_get_current_tenant_id(), function_exists('gd_client_portal_user_is_tenant_admin') && gd_client_portal_user_is_tenant_admin(), function_exists('gd_client_portal_is_platform_admin') && gd_client_portal_is_platform_admin(), 20);
+    $repo = new GDCP_Billing_Repository();
+    $invoices = $repo->list_outstanding_for_scope(get_current_user_id(), gd_client_portal_get_current_tenant_id(), function_exists('gd_client_portal_user_is_tenant_admin') && gd_client_portal_user_is_tenant_admin(), function_exists('gd_client_portal_is_platform_admin') && gd_client_portal_is_platform_admin(), 20);
 }
 ?>
 <div class="gd-module-detail gd-invoice-detail">
