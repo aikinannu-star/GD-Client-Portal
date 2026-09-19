@@ -346,13 +346,17 @@ if (!function_exists('gd_client_portal_render_dashboard_sections')) {
                 echo '<div class="gd-card-content"><div class="gd-card-summary">' . esc_html(!empty($live['summary']) ? $live['summary'] : gd_client_portal_get_dashboard_card_summary($card_id, $card)) . '</div>'; if (!empty($live['status'])) { echo '<div class="gd-card-status">' . esc_html($live['status']) . '</div>'; } echo '</div>';
 
                 // Add a primary action button linking to module-specific view on the dashboard, or to a provided card URL
+                $is_external = false;
                 if (!empty($card['url'])) {
                     $action_url = esc_url($card['url']);
+                    $target_host = wp_parse_url($card['url'], PHP_URL_HOST);
+                    $site_host = wp_parse_url(home_url('/'), PHP_URL_HOST);
+                    $is_external = $target_host && $site_host && strtolower($target_host) !== strtolower($site_host);
                 } else {
                     $action_url = esc_url(add_query_arg('module', $card_id, gd_client_portal_get_dashboard_url()));
                 }
                 echo '<div class="gd-card-actions">';
-                echo '<a class="gd-btn" href="' . $action_url . '" data-module="' . esc_attr($card_id) . '"' . (empty($card['url']) ? '' : ' target="_blank" rel="noopener noreferrer"') . '>' . esc_html__('Open', 'gd-client-portal') . '</a>';
+                echo '<a class="gd-btn" href="' . $action_url . '" data-module="' . esc_attr($card_id) . '"' . ($is_external ? ' target="_blank" rel="noopener noreferrer"' : '') . '>' . esc_html__('Open', 'gd-client-portal') . '</a>';
                 echo '</div>';
                 echo '</div>';
             }
