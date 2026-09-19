@@ -368,12 +368,18 @@ if (!function_exists('gd_client_portal_render_dashboard_sections')) {
 }
 
 add_shortcode('gd_dashboard_sections', 'gd_client_portal_render_dashboard_sections');
-add_shortcode('gd_customer_files', 'gd_client_portal_render_placeholder_shortcode');
-add_shortcode('gd_private_messages', 'gd_client_portal_render_placeholder_shortcode');
-add_shortcode('gd_booking_calendar', 'gd_client_portal_render_placeholder_shortcode');
-add_shortcode('gd_support_tickets', 'gd_client_portal_render_placeholder_shortcode');
-add_shortcode('gd_marketplace', 'gd_client_portal_render_placeholder_shortcode');
-add_shortcode('gd_woo_downloads', 'gd_client_portal_render_placeholder_shortcode');
-add_shortcode('gd_woo_invoices', 'gd_client_portal_render_billing_center');
-add_shortcode('gd_billing_center', 'gd_client_portal_render_billing_center');
-add_shortcode('gd_account_settings', 'gd_client_portal_render_placeholder_shortcode');
+foreach (array(
+    'gd_customer_files',
+    'gd_private_messages',
+    'gd_booking_calendar',
+    'gd_support_tickets',
+    'gd_marketplace',
+    'gd_woo_downloads',
+    'gd_account_settings',
+) as $gdcp_legacy_shortcode) {
+    if (!shortcode_exists($gdcp_legacy_shortcode)) {
+        add_shortcode($gdcp_legacy_shortcode, 'gd_client_portal_render_placeholder_shortcode');
+    }
+}
+if (!shortcode_exists('gd_woo_invoices')) add_shortcode('gd_woo_invoices', 'gd_client_portal_render_billing_center');
+if (!shortcode_exists('gd_billing_center')) add_shortcode('gd_billing_center', 'gd_client_portal_render_billing_center');
