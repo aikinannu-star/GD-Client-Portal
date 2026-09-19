@@ -1186,3 +1186,38 @@ body {
 .gdcp-brand-header__welcome { margin:6px 0 0; opacity:.9; }
 .gdcp-brand-button { display:inline-flex; align-items:center; justify-content:center; background:var(--gdcp-primary); color:#fff!important; border-radius:9px; padding:10px 15px; text-decoration:none!important; font-weight:600; }
 @media(max-width:640px){ .gdcp-brand-header{align-items:flex-start;padding:16px;gap:12px}.gdcp-brand-header__logo{width:46px;height:46px;flex-basis:46px}.gdcp-brand-header__title{font-size:20px} }
+
+
+/* Live-data UX consistency */
+.gd-live-summary-note {
+    margin: 14px 0 0;
+    padding: 12px 14px;
+    border: 1px solid rgba(217, 208, 200, 0.8);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.18);
+    color: #5f5a56;
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+.gd-empty-state strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #24211f;
+    font-size: 1rem;
+}
+.gd-empty-state p {
+    margin: 0;
+}
+.gd-live-summary .gd-module-status {
+    background: rgba(118, 170, 130, 0.12);
+    border-color: rgba(118, 170, 130, 0.3);
+    color: #1f4d2f;
+}
+.gd-module-detail a {
+    color: #111;
+    font-weight: 600;
+}
+.gd-module-detail a:hover,
+.gd-module-detail a:focus {
+    text-decoration: underline;
+}
