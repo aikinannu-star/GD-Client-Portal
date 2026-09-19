@@ -74,14 +74,7 @@ if (!function_exists('gd_client_portal_module_projects_activate')) {
 
 		update_option('gd_client_portal_module_projects_installed', current_time('mysql'));
 
-		// Insert sample data if table is empty
-		$exists = $wpdb->get_var("SELECT COUNT(*) FROM {$table_name}");
-		if (empty($exists)) {
-			$admin_id = get_current_user_id() ?: 1;
-			$now = current_time('mysql');
-			$wpdb->insert($table_name, array('user_id' => $admin_id, 'title' => 'Sample Project Alpha', 'created_at' => $now), array('%d', '%s', '%s'));
-			$wpdb->insert($table_name, array('user_id' => $admin_id, 'title' => 'Sample Project Beta', 'created_at' => $now), array('%d', '%s', '%s'));
-		}
+		// Do not seed demo/sample projects. The portal must reflect real client data only.
 	}
 }
 
