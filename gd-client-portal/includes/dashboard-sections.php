@@ -1,67 +1,113 @@
-<?php
-/**
- * Dashboard information architecture and section organization.
- */
-
-if (!defined('ABSPATH')) {
-    exit;
-}
-
 if (!function_exists('gd_client_portal_render_placeholder_shortcode')) {
     function gd_client_portal_render_placeholder_shortcode($atts = array(), $content = null, $tag = '')
     {
         $module = isset($atts['module']) ? sanitize_key($atts['module']) : sanitize_key(str_replace(array('gd_', '_ui'), array('', ''), $tag ?: 'module'));
-
-        $module_labels = array(
-            'projects' => array('title' => __('Project overview', 'gd-client-portal'), 'subtitle' => __('Your current service portfolio', 'gd-client-portal'), 'status' => __('3 active projects', 'gd-client-portal')),
-            'workflow' => array('title' => __('Workflow overview', 'gd-client-portal'), 'subtitle' => __('Progress across delivery stages', 'gd-client-portal'), 'status' => __('2 tasks due soon', 'gd-client-portal')),
-            'files' => array('title' => __('Files & assets', 'gd-client-portal'), 'subtitle' => __('Shared documents and final package files', 'gd-client-portal'), 'status' => __('14 files uploaded', 'gd-client-portal')),
-            'deliverables' => array('title' => __('Deliverables', 'gd-client-portal'), 'subtitle' => __('Milestone outputs and package releases', 'gd-client-portal'), 'status' => __('5 deliverables ready', 'gd-client-portal')),
-            'messages' => array('title' => __('Inbox', 'gd-client-portal'), 'subtitle' => __('Recent team messages and updates', 'gd-client-portal'), 'status' => __('3 unread messages', 'gd-client-portal')),
-            'meetings' => array('title' => __('Meetings', 'gd-client-portal'), 'subtitle' => __('Upcoming reviews and check-ins', 'gd-client-portal'), 'status' => __('2 meetings this week', 'gd-client-portal')),
-            'support' => array('title' => __('Support centre', 'gd-client-portal'), 'subtitle' => __('Tickets, help requests, and resolutions', 'gd-client-portal'), 'status' => __('1 open ticket', 'gd-client-portal')),
-            'marketplace' => array('title' => __('Marketplace', 'gd-client-portal'), 'subtitle' => __('Add-ons, services, and available offers', 'gd-client-portal'), 'status' => __('4 items available', 'gd-client-portal')),
-            'downloads' => array('title' => __('Downloads', 'gd-client-portal'), 'subtitle' => __('Files, assets, and client resources', 'gd-client-portal'), 'status' => __('3 files ready', 'gd-client-portal')),
-            'invoices' => array('title' => __('Billing overview', 'gd-client-portal'), 'subtitle' => __('Invoices, payments, and balances', 'gd-client-portal'), 'status' => __('1 payment due', 'gd-client-portal')),
-            'account' => array('title' => __('Account details', 'gd-client-portal'), 'subtitle' => __('Profile, business details, and preferences', 'gd-client-portal'), 'status' => __('Profile is current', 'gd-client-portal')),
-        );
-
-        $module_data = isset($module_labels[$module]) ? $module_labels[$module] : array(
-            'title' => __('Module overview', 'gd-client-portal'),
-            'subtitle' => __('This portal module is ready for your custom implementation.', 'gd-client-portal'),
-            'status' => __('Ready for updates', 'gd-client-portal'),
-        );
-
-        $rows = array(
-            array('label' => __('Latest update', 'gd-client-portal'), 'value' => __('Shared by the service team', 'gd-client-portal')),
-            array('label' => __('Next action', 'gd-client-portal'), 'value' => __('Review the latest item and confirm completion', 'gd-client-portal')),
-            array('label' => __('Owner', 'gd-client-portal'), 'value' => __('Client portal team', 'gd-client-portal')),
-        );
-
-        $stat_cards = array(
-            array('label' => __('Active', 'gd-client-portal'), 'value' => '4'),
-            array('label' => __('Pending', 'gd-client-portal'), 'value' => '2'),
-            array('label' => __('Updated', 'gd-client-portal'), 'value' => __('Today', 'gd-client-portal')),
-        );
-
-        $html = '<div class="gd-module-detail">';
-        $html .= '<header class="gd-module-detail-header">';
-        $html .= '<div><span class="gd-module-kicker">' . esc_html($module_data['subtitle']) . '</span><h2>' . esc_html($module_data['title']) . '</h2></div>';
-        $html .= '<span class="gd-module-status">' . esc_html($module_data['status']) . '</span>';
-        $html .= '</header>';
-        $html .= '<div class="gd-module-stats">';
-        foreach ($stat_cards as $stat) {
-            $html .= '<div class="gd-module-stat"><strong>' . esc_html($stat['value']) . '</strong><span>' . esc_html($stat['label']) . '</span></div>';
+        $renderer = function_exists('gd_client_portal_get_registered_dashboard_view') ? gd_client_portal_get_registered_dashboard_view($module) : null;
+        if ($renderer) {
+            try {
+                $output = is_callable($renderer) ? call_user_func($renderer, $atts) : '';
+                if (is_string($output) && trim(strip_tags($output)) !== '') return $output;
+            } catch (Throwable $e) {}
         }
-        $html .= '</div>';
-        $html .= '<div class="gd-module-table-wrap"><table class="gd-module-table"><tbody>';
-        foreach ($rows as $row) {
-            $html .= '<tr><th>' . esc_html($row['label']) . '</th><td>' . esc_html($row['value']) . '</td></tr>';
-        }
-        $html .= '</tbody></table></div>';
-        $html .= '</div>';
+        $fallbacks = array(
+            'projects' => __('No project workspace is available yet.', 'gd-client-portal'),
+            'workflow' => __('No workflow activity is available yet.', 'gd-client-portal'),
+            'files' => __('No shared files are available yet.', 'gd-client-portal'),
+            'deliverables' => __('No deliverables are available yet.', 'gd-client-portal'),
+            'messages' => __('No project messages are available yet.', 'gd-client-portal'),
+            'meetings' => __('No upcoming meetings are scheduled.', 'gd-client-portal'),
+            'support' => __('No support activity is available yet.', 'gd-client-portal'),
+            'marketplace' => __('No marketplace items are currently available.', 'gd-client-portal'),
+            'downloads' => __('No downloadable resources are currently available.', 'gd-client-portal'),
+            'account' => __('Your account details are ready to review.', 'gd-client-portal'),
+        );
+        return '<div class="gd-module-empty-state"><p>' . esc_html(isset($fallbacks[$module]) ? $fallbacks[$module] : __('No content is available for this module yet.', 'gd-client-portal')) . '</p></div>';
+    }
+}
 
-        return $html;
+if (!function_exists('gd_client_portal_get_dashboard_card_live_data')) {
+    function gd_client_portal_get_dashboard_card_live_data($card_id)
+    {
+        $data = array('summary' => '', 'status' => '');
+        switch ($card_id) {
+            case 'projects':
+                $projects = function_exists('gd_client_portal_get_visible_projects') ? gd_client_portal_get_visible_projects(500) : array();
+                $count = count((array) $projects);
+                $data['summary'] = $count ? sprintf(_n('%d project currently visible to you.', '%d projects currently visible to you.', $count, 'gd-client-portal'), $count) : __('No projects are currently assigned to you.', 'gd-client-portal');
+                $data['status'] = $count ? sprintf(_n('%d active', '%d active', $count, 'gd-client-portal'), $count) : __('No active projects', 'gd-client-portal');
+                break;
+            case 'workflow':
+                $projects = function_exists('gd_client_portal_get_visible_projects') ? gd_client_portal_get_visible_projects(500) : array();
+                $tasks = array();
+                foreach ((array) $projects as $project) if (function_exists('gd_client_portal_collab_get_tasks')) $tasks = array_merge($tasks, (array) gd_client_portal_collab_get_tasks(absint($project->id), 100));
+                $open = 0; $due = 0; $today = current_time('timestamp'); $week = strtotime('+7 days', $today);
+                foreach ($tasks as $task) {
+                    $status = isset($task->status) ? sanitize_key($task->status) : '';
+                    if (!in_array($status, array('done', 'completed'), true)) $open++;
+                    if (!empty($task->due_date) && strtotime($task->due_date) >= $today && strtotime($task->due_date) <= $week && !in_array($status, array('done', 'completed'), true)) $due++;
+                }
+                $data['summary'] = $open ? sprintf(_n('%d open workflow task across your projects.', '%d open workflow tasks across your projects.', $open, 'gd-client-portal'), $open) : __('No open workflow tasks across your projects.', 'gd-client-portal');
+                $data['status'] = $due ? sprintf(_n('%d due this week', '%d due this week', $due, 'gd-client-portal'), $due) : __('No tasks due this week', 'gd-client-portal');
+                break;
+            case 'files':
+                $rows = function_exists('gd_client_portal_documents_get') ? gd_client_portal_documents_get(array('limit' => 500)) : array();
+                $count = count((array) $rows);
+                $data['summary'] = $count ? sprintf(_n('%d shared file available in your workspace.', '%d shared files available in your workspace.', $count, 'gd-client-portal'), $count) : __('No shared files are available yet.', 'gd-client-portal');
+                $data['status'] = $count ? sprintf(_n('%d file', '%d files', $count, 'gd-client-portal'), $count) : __('No files yet', 'gd-client-portal');
+                break;
+            case 'deliverables':
+                $projects = function_exists('gd_client_portal_get_visible_projects') ? gd_client_portal_get_visible_projects(500) : array();
+                $count = 0;
+                foreach ((array) $projects as $project) if (function_exists('gd_client_portal_get_delivery_versions')) $count += count((array) gd_client_portal_get_delivery_versions(absint($project->id), true));
+                $data['summary'] = $count ? sprintf(_n('%d published deliverable is available.', '%d published deliverables are available.', $count, 'gd-client-portal'), $count) : __('No published deliverables are available yet.', 'gd-client-portal');
+                $data['status'] = $count ? sprintf(_n('%d published', '%d published', $count, 'gd-client-portal'), $count) : __('Nothing published yet', 'gd-client-portal');
+                break;
+            case 'messages':
+                $rows = function_exists('gdcp_message_repository') ? gdcp_message_repository()->list_for_user(get_current_user_id(), gd_client_portal_get_current_tenant_id(), gd_client_portal_user_is_tenant_admin(), 20) : array();
+                $count = count((array) $rows); $latest = !empty($rows) ? $rows[0] : null;
+                $data['summary'] = $latest && !empty($latest->body) ? sprintf(__('Latest project message: %s', 'gd-client-portal'), wp_trim_words(wp_strip_all_tags($latest->body), 14)) : ($count ? sprintf(_n('%d project message available.', '%d project messages available.', $count, 'gd-client-portal'), $count) : __('No project messages yet.', 'gd-client-portal'));
+                $data['status'] = $count ? sprintf(_n('%d recent message', '%d recent messages', $count, 'gd-client-portal'), $count) : __('No messages yet', 'gd-client-portal');
+                break;
+            case 'meetings':
+                $start = current_time('mysql'); $end = date('Y-m-d H:i:s', strtotime('+30 days', current_time('timestamp')));
+                $events = function_exists('gd_client_portal_calendar_events') ? gd_client_portal_calendar_events($start, $end, 0) : array();
+                $count = count((array) $events); $next = !empty($events) ? $events[0] : null;
+                $next_title = $next ? (is_array($next) ? ($next['title'] ?? '') : ($next->title ?? '')) : '';
+                $data['summary'] = $next_title ? sprintf(__('Next scheduled event: %s', 'gd-client-portal'), $next_title) : __('No meetings or milestones are scheduled in the next 30 days.', 'gd-client-portal');
+                $data['status'] = $count ? sprintf(_n('%d upcoming event', '%d upcoming events', $count, 'gd-client-portal'), $count) : __('No upcoming events', 'gd-client-portal');
+                break;
+            case 'support':
+                $rows = function_exists('gd_client_portal_support_tickets') ? gd_client_portal_support_tickets(100) : array(); $open = 0;
+                foreach ((array) $rows as $ticket) { $status = isset($ticket->status) ? sanitize_key($ticket->status) : ''; if (!in_array($status, array('closed', 'resolved'), true)) $open++; }
+                $data['summary'] = $open ? sprintf(_n('%d support ticket needs attention.', '%d support tickets need attention.', $open, 'gd-client-portal'), $open) : __('No open support tickets need attention.', 'gd-client-portal');
+                $data['status'] = $open ? sprintf(_n('%d open', '%d open', $open, 'gd-client-portal'), $open) : __('All clear', 'gd-client-portal');
+                break;
+            case 'marketplace':
+                $items = function_exists('gd_client_portal_filter_items_by_tenant') ? gd_client_portal_filter_items_by_tenant(get_option('gd_client_portal_marketplace_items', array()), gd_client_portal_get_current_tenant_id()) : array();
+                $visible = array_filter((array) $items, static function ($item) { return !empty($item['enabled']); }); $count = count($visible);
+                $data['summary'] = $count ? sprintf(_n('%d service is currently available in the marketplace.', '%d services are currently available in the marketplace.', $count, 'gd-client-portal'), $count) : __('No marketplace services are currently available.', 'gd-client-portal');
+                $data['status'] = $count ? sprintf(_n('%d available', '%d available', $count, 'gd-client-portal'), $count) : __('No services available', 'gd-client-portal');
+                break;
+            case 'downloads':
+                $downloads = function_exists('wc_get_customer_available_downloads') ? wc_get_customer_available_downloads() : array(); $count = count((array) $downloads);
+                $data['summary'] = $count ? sprintf(_n('%d downloadable resource is available to you.', '%d downloadable resources are available to you.', $count, 'gd-client-portal'), $count) : __('No downloadable resources are currently available.', 'gd-client-portal');
+                $data['status'] = $count ? sprintf(_n('%d ready', '%d ready', $count, 'gd-client-portal'), $count) : __('No downloads yet', 'gd-client-portal');
+                break;
+            case 'invoices':
+                $invoices = function_exists('gd_client_portal_billing_get_invoices') ? gd_client_portal_billing_get_invoices(200) : array(); $due = 0; $balance = 0.0;
+                foreach ((array) $invoices as $invoice) { $status = isset($invoice->status) ? sanitize_key($invoice->status) : ''; if (!in_array($status, array('paid', 'cancelled', 'canceled'), true)) { $due++; $balance += max(0, (float) $invoice->total - (float) $invoice->amount_paid); } }
+                $data['summary'] = $due ? sprintf(_n('%d invoice currently has an outstanding balance.', '%d invoices currently have outstanding balances.', $due, 'gd-client-portal'), $due) : __('No outstanding invoice balance.', 'gd-client-portal');
+                $data['status'] = $due ? sprintf(_n('%d outstanding', '%d outstanding', $due, 'gd-client-portal'), $due) : __('Paid up to date', 'gd-client-portal');
+                if ($due && $balance > 0 && function_exists('gd_client_portal_billing_money')) $data['summary'] .= ' ' . sprintf(__('Outstanding balance: %s.', 'gd-client-portal'), gd_client_portal_billing_money($balance, 'GHS'));
+                break;
+            case 'account':
+                $user = wp_get_current_user(); $fields = array('first_name', 'last_name', 'billing_email', 'billing_phone', 'company_name', 'company_address'); $filled = 0;
+                foreach ($fields as $field) if (get_user_meta($user->ID, $field, true) !== '') $filled++;
+                $data['summary'] = $filled === count($fields) ? __('Your profile information is complete.', 'gd-client-portal') : sprintf(__('%d of %d key profile fields are filled in.', 'gd-client-portal'), $filled, count($fields));
+                $data['status'] = $filled === count($fields) ? __('Profile complete', 'gd-client-portal') : __('Profile needs review', 'gd-client-portal');
+                break;
+        }
+        return $data;
     }
 }
 
@@ -296,7 +342,8 @@ if (!function_exists('gd_client_portal_render_dashboard_sections')) {
                 echo '<h3>' . esc_html($card['label']) . '</h3>';
                 echo '</div>';
                 echo '<p class="gd-card-description">' . esc_html($card['description']) . '</p>';
-                echo '<div class="gd-card-content"><div class="gd-card-summary">' . esc_html(gd_client_portal_get_dashboard_card_summary($card_id, $card)) . '</div></div>';
+                $live = gd_client_portal_get_dashboard_card_live_data($card_id);
+                echo '<div class="gd-card-content"><div class="gd-card-summary">' . esc_html(!empty($live['summary']) ? $live['summary'] : gd_client_portal_get_dashboard_card_summary($card_id, $card)) . '</div>'; if (!empty($live['status'])) { echo '<div class="gd-card-status">' . esc_html($live['status']) . '</div>'; } echo '</div>';
 
                 // Add a primary action button linking to module-specific view on the dashboard, or to a provided card URL
                 if (!empty($card['url'])) {
